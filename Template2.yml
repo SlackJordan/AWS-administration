@@ -45,13 +45,6 @@ Resources:
             Fn::Sub: "${NetworkStackName}-WebInstanceSecurityGroup"
 
 
-  ALBListener:
-    Type: "AWS::ElasticLoadBalancingV2::Listener"
-    Properties:
-        LoadBalancerArn: !Ref ApplicationLoadBalancer
-        Port: 80
-        Protocol: "HTTP"
-
   ALBTargetGroup:
     Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
     Properties:
@@ -86,6 +79,14 @@ Resources:
           - Fn::ImportValue:
               Fn::Sub: "${NetworkStackName}-ALBSecurityGroup"
         IpAddressType: "ipv4"
+  
+  ALBListener:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    Properties:
+        LoadBalancerArn: !Ref ApplicationLoadBalancer
+        Port: 80
+        Protocol: "HTTP"
+
 
 #  Outputs:
 # This is an example of the complete YAML code for outputting the VPC information and also exporting the VPC ID for use
