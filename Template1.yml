@@ -117,7 +117,7 @@ Outputs:
       Ref: VPC
     Export:
       Name:
-        Fn::Sub: "${AWS::StackName}-VPCId"
+        Fn::Sub: "${AWS::StackName}-VPC"
   PrivateSubnet1:
     Description: Private Subnet 1
     Value:
