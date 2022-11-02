@@ -52,17 +52,18 @@ Resources:
         HealthCheckPath: "/"
         Port: 80
         Protocol: "HTTP"
-        HealthCheckPort: "traffic-port"
-        HealthCheckProtocol: "HTTP"
-        HealthCheckTimeoutSeconds: 5
         UnhealthyThresholdCount: 2
         TargetType: "instance"
-        Matcher: 
-            HttpCode: "200"
+        Targets:
+          - Id: !Ref WebServerInstance1
+            Port: 80
+          - Id: !Ref WebServerInstance2
+            Port: 80
         HealthyThresholdCount: 5
-        VpcId: !Ref VPC
+        VpcId: 
+          Fn::ImportValue:
+            Fn::Sub: ${NetworkStackName}-VPCId
         Name: "target-group"
-        HealthCheckEnabled: true
 
   ApplicationLoadBalancer:
     Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
@@ -72,9 +73,9 @@ Resources:
         Type: "application"
         Subnets: 
           - Fn::ImportValue:
-              Fn::Sub: "${NetworkStackName}-PublicSubnet1"
+              Fn::Sub: "${NetworkStackName}-PrivateSubnet1"
           - Fn::ImportValue:
-              Fn::Sub: "${NetworkStackName}-PublicSubnet2"
+              Fn::Sub: "${NetworkStackName}-PrivateSubnet2"
         SecurityGroups: 
           - Fn::ImportValue:
               Fn::Sub: "${NetworkStackName}-ALBSecurityGroup"
@@ -83,13 +84,24 @@ Resources:
   ALBListener:
     Type: "AWS::ElasticLoadBalancingV2::Listener"
     Properties:
-        LoadBalancerArn: !Ref ApplicationLoadBalancer
-        Port: 80
-        Protocol: "HTTP"
+      DefaultActions:
+        - Type: forward
+          ForwardConfig:
+            TargetGroups:
+              - TargetGroupArn: !Ref ALBTargetGroup
+      LoadBalancerArn: !Ref ApplicationLoadBalancer
+      Port: 80
+      Protocol: "HTTP"
 
 
 #  Outputs:
 # This is an example of the complete YAML code for outputting the VPC information and also exporting the VPC ID for use
 # by another template
 #  ApplicationLoadBalancer:
+#       Description: Private Subnet 2
+#    Value:
+#      Ref: PrivateSubnet2
+#    Export:
+#      Name:
+#        Fn::Sub: "${AWS::StackName}-PrivateSubnet2"
 # Need the DNS/URL of the ApplicationLoadBalancer
